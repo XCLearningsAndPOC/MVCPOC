@@ -1,4 +1,5 @@
 ﻿using MyShop.Core.Models;
+using MyShop.Core.ViewModels;
 using MyShop.DataAccess.InMemory;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,12 @@ namespace MyShop.WebUI.Controllers
     public class ProductManagerController : Controller
     {
         ProductRepository context;
+        ProductCategoryRepository productCategories;
 
         public ProductManagerController()
         {
             context = new ProductRepository();
+            productCategories = new ProductCategoryRepository();
         }
 
 
@@ -28,8 +31,12 @@ namespace MyShop.WebUI.Controllers
 
         public ActionResult Create()
         {
-            Product product = new Product();
-            return View(product);
+            ProductManagerViewModel productManagerViewModel = new ProductManagerViewModel();
+
+            productManagerViewModel.Product = new Product();
+            productManagerViewModel.ProductCategories = productCategories.Collection();
+
+            return View(productManagerViewModel);
         }
 
         [HttpPost]
@@ -57,12 +64,17 @@ namespace MyShop.WebUI.Controllers
             }
             else
             {
-                return View(product);
+                ProductManagerViewModel productManagerViewModel = new ProductManagerViewModel();
+
+                productManagerViewModel.Product = product;
+                productManagerViewModel.ProductCategories = productCategories.Collection();
+
+                return View(productManagerViewModel);
             }
         }
 
         [HttpPost]
-        public ActionResult Edit(Product product, string Id)
+        public ActionResult Edit(ProductManagerViewModel productManagerViewModel, string Id)
         {
             Product productToEdit = context.Find(Id);
             if (productToEdit == null)
@@ -73,14 +85,14 @@ namespace MyShop.WebUI.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return View(product);
+                    return View(productManagerViewModel);
                 }
 
-                productToEdit.Category = product.Category;
-                productToEdit.Description = product.Description;
-                productToEdit.Image = product.Image;
-                productToEdit.Price = product.Price;
-                productToEdit.Name = product.Name;
+                productToEdit.Category = productManagerViewModel.Product.Category;
+                productToEdit.Description = productManagerViewModel.Product.Description;
+                productToEdit.Image = productManagerViewModel.Product.Image;
+                productToEdit.Price = productManagerViewModel.Product.Price;
+                productToEdit.Name = productManagerViewModel.Product.Name;
 
                 context.Commit();
 
