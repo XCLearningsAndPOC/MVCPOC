@@ -4,6 +4,7 @@ using MyShop.Core.ViewModels;
 using MyShop.DataAccess.InMemory;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -42,7 +43,7 @@ namespace MyShop.WebUI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Create(Product product)
+        public ActionResult Create(Product product, HttpPostedFileBase httpPostedFileBase)
         {
             if (!ModelState.IsValid)
             {
@@ -50,6 +51,11 @@ namespace MyShop.WebUI.Controllers
             }
             else
             {
+                if (httpPostedFileBase != null)
+                {
+                    product.Image = product.Id + Path.GetExtension(httpPostedFileBase.FileName);
+                    httpPostedFileBase.SaveAs(Server.MapPath("//Content//ProductImages//") + product.Image);
+                }
                 context.Insert(product);
                 context.Commit();
 
@@ -76,7 +82,7 @@ namespace MyShop.WebUI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(ProductManagerViewModel productManagerViewModel, string Id)
+        public ActionResult Edit(Product product, string Id, HttpPostedFileBase httpPostedFileBase)
         {
             Product productToEdit = context.Find(Id);
             if (productToEdit == null)
@@ -87,14 +93,19 @@ namespace MyShop.WebUI.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return View(productManagerViewModel);
+                    return View(product);
                 }
 
-                productToEdit.Category = productManagerViewModel.Product.Category;
-                productToEdit.Description = productManagerViewModel.Product.Description;
-                productToEdit.Image = productManagerViewModel.Product.Image;
-                productToEdit.Price = productManagerViewModel.Product.Price;
-                productToEdit.Name = productManagerViewModel.Product.Name;
+                if (httpPostedFileBase != null)
+                {
+                    productToEdit.Image = product.Id + Path.GetExtension(httpPostedFileBase.FileName);
+                    httpPostedFileBase.SaveAs(Server.MapPath("//Content//ProductImages//") + productToEdit.Image);
+                }
+
+                productToEdit.Category = product.Category;
+                productToEdit.Description = product.Description;                
+                productToEdit.Price = product.Price;
+                productToEdit.Name = product.Name;
 
                 context.Commit();
 
