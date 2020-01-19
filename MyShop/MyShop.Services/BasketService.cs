@@ -24,7 +24,7 @@ namespace MyShop.Services
 			this.productContext = ProductContext;
 		}
 
-		private Basket GetBasket(HttpContext httpContext, bool createIfNull)
+		private Basket GetBasket(HttpContextBase httpContext, bool createIfNull)
 		{
 			HttpCookie httpCookie = httpContext.Request.Cookies.Get(BasketSessionName);
 
@@ -55,7 +55,7 @@ namespace MyShop.Services
 			return basket;
 		}
 
-		private Basket CreateNewBasket(HttpContext httpContext)
+		private Basket CreateNewBasket(HttpContextBase httpContext)
 		{
 			Basket basket = new Basket();
 			basketContext.Insert(basket);
@@ -71,7 +71,7 @@ namespace MyShop.Services
 			return basket;
 		}
 
-		public void AddToBasket(HttpContext httpContext, string productId)
+		public void AddToBasket(HttpContextBase httpContext, string productId)
 		{
 			Basket basket = GetBasket(httpContext, true);
 			BasketItem basketItem = basket.BasketItems.FirstOrDefault(i => i.ProductId == productId);
@@ -84,6 +84,8 @@ namespace MyShop.Services
 					ProductId = productId,
 					Quantity = 1
 				};
+
+				basket.BasketItems.Add(basketItem);
 			}
 			else
 			{
@@ -93,7 +95,7 @@ namespace MyShop.Services
 			basketContext.Commit();
 		}
 
-		public void RemoveFromBasket(HttpContext httpContext, string basketItemID)
+		public void RemoveFromBasket(HttpContextBase httpContext, string basketItemID)
 		{
 			Basket basket = GetBasket(httpContext, true);
 			BasketItem basketItem = basket.BasketItems.FirstOrDefault(i => i.Id == basketItemID);
@@ -105,7 +107,7 @@ namespace MyShop.Services
 			}
 		}
 
-		public List<BasketItemViewModel> GetBasketItems(HttpContext httpContext)
+		public List<BasketItemViewModel> GetBasketItems(HttpContextBase httpContext)
 		{
 			Basket basket = GetBasket(httpContext, false);
 
@@ -131,7 +133,7 @@ namespace MyShop.Services
 
 		}
 
-		public BasketSummaryViewModel GetBasketSummary(HttpContext httpContext)
+		public BasketSummaryViewModel GetBasketSummary(HttpContextBase httpContext)
 		{
 			Basket basket = GetBasket(httpContext, false);
 			BasketSummaryViewModel basketSummaryViewModel = new BasketSummaryViewModel(0, 0);
